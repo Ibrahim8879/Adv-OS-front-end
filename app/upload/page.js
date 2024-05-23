@@ -12,20 +12,34 @@ const UploadPage = () => {
   };
 
   // Function to handle file upload
-  const handleUpload = () => {
+  const handleUpload = async () => {
     setUploading(true);
-    // Perform file upload logic here, e.g., upload files to a server
-    setTimeout(() => {
-      // Simulate upload completion after 2 seconds
-      console.log('Files uploaded:', selectedFiles);
-      setSelectedFiles([]);
+    try {
+      const formData = new FormData();
+      selectedFiles.forEach((file) => {
+        formData.append('files', file);
+      });
+      const response = await fetch('http://localhost:5000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (response.ok) {
+        setSelectedFiles([]);
+        setUploadSuccess(true);
+        // Reset success message after 5 seconds
+        setTimeout(() => {
+          setUploadSuccess(false);
+        }, 5000);
+      } else {
+        // Handle upload failure
+        console.error('Upload failed:', response.statusText);
+      }
+    } catch (error) {
+      // Handle fetch error
+      console.error('Upload failed:', error.message);
+    } finally {
       setUploading(false);
-      setUploadSuccess(true);
-      // Reset success message after 5 seconds
-      setTimeout(() => {
-        setUploadSuccess(false);
-      }, 5000);
-    }, 2000);
+    }
   };
 
   // Function to remove a file from the selectedFiles array
